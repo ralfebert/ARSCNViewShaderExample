@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>passes</key>
+	<dict>
+		<key>mask_scene</key>
+		<dict>
+			<key>draw</key>
+			<string>DRAW_QUAD</string>
+			<key>program</key>
+			<string>doesntexist</string>
+			<key>metalVertexShader</key>
+			<string>pass_through_vertex</string>
+			<key>metalFragmentShader</key>
+			<string>apply_mask_fragment</string>
+			<key>inputs</key>
+			<dict>
+				<key>color_sampler</key>
+				<string>COLOR</string>
+				<key>mask_sampler</key>
+				<string>mask</string>
+			</dict>
+			<key>outputs</key>
+			<dict>
+				<key>color</key>
+				<string>COLOR</string>
+			</dict>
+		</dict>
+	</dict>
+	<key>sequence</key>
+	<array>
+		<string>mask_scene</string>
+	</array>
+	<key>symbols</key>
+	<dict>
+		<key>mask</key>
+		<dict>
+			<key>type</key>
+			<string>sampler2D</string>
+		</dict>
+	</dict>
+</dict>
+</plist>
