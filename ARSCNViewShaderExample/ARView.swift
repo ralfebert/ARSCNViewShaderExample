@@ -40,10 +40,15 @@ struct ARView: UIViewRepresentable {
 
     class Coordinator: NSObject, ARSessionDelegate, ARSCNViewDelegate {
         @Binding var shaderEnabled: Bool
-        weak var view: ARSCNView?
+        weak var view: ARSCNView? {
+            didSet {
+                self.textureLoader = MTKTextureLoader(device: view!.device!)
+            }
+        }
         var maskImage: CGImage?
         var maskLock = NSLock()
         var materialProperty = SCNMaterialProperty()
+        var textureLoader : MTKTextureLoader!
 
         var queue: OperationQueue = {
             let queue = OperationQueue()
@@ -138,6 +143,12 @@ struct ARView: UIViewRepresentable {
 
         func renderer(_: SCNSceneRenderer, willRenderScene _: SCNScene, atTime _: TimeInterval) {
             guard let view = self.view else { return }
+
+            // Access to maskImage is locked because Swift properties are not atomic
+            // and this property is accessed from the bg thread and the SceneKit render thread
+            maskLock.lock()
+            defer { self.maskLock.unlock() }
+
             if let maskImage = maskImage, self.shaderEnabled {
                 // load SCNTechnique if not already loaded
                 if view.technique == nil {
@@ -146,13 +157,10 @@ struct ARView: UIViewRepresentable {
                     view.technique = SCNTechnique(name: "mask_technique")
                 }
 
-                // Access to maskImage is locked because Swift properties are not atomic
-                // and this property is accessed from the bg thread and the SceneKit render thread
-                maskLock.lock()
-                defer { self.maskLock.unlock() }
-
                 // set mask image as image sampler for shader
-                view.technique?.setObject(maskImage, forKeyedSubscript: "mask" as NSCopying)
+                let material = SCNMaterialProperty(contents: try! textureLoader.newTexture(cgImage: maskImage))
+                view.technique?.setObject(material, forKeyedSubscript: "mask" as NSCopying)
+                // view.technique?.setObject(maskImage, forKeyedSubscript: "mask" as NSCopying)
             } else {
                 view.technique = nil
             }
