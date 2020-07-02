@@ -11,6 +11,7 @@ struct ARView: UIViewRepresentable {
         context.coordinator.view = sceneView
 
         // Set the view's delegate
+        sceneView.preferredFramesPerSecond = 120
         sceneView.delegate = context.coordinator
 
         // Show statistics such as fps and timing information
